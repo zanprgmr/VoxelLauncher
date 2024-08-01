@@ -2,7 +2,6 @@
 # WORK IN PROGRESS
 Working on implementing:
 
-    -Forge and fabric installing
     -Mod support
     -Account login + skin system
     -Easily backup your worlds
