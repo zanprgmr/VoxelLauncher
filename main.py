@@ -3,60 +3,14 @@ from PIL import Image
 import customtkinter as ctk
 import utils
 import minecraft_launcher_lib as mc
-from subprocess import run as subprocess_run
 import tkinter.messagebox as messagebox
 import threading
-from os.path import exists
 from os import startfile
-import pickle
 import shlex
-
+import pickle
 
 config_file = "config.pickle"
 shared_data = {"jvmArguments": None}
-
-
-def create_file_if_not_exists(filename):
-    if exists(filename):
-        pass
-    else:
-        try:
-            with open(filename, 'x') as file:
-                pass
-        except FileExistsError:
-            pass
-
-
-def save_config(config_file, name, version, shared_data):
-    with open(config_file, "wb") as config_read:
-        pickle.dump([name.get(), version.get(), shared_data], config_read)
-
-
-def execute_mc(app, name_tx, version_drop, inst_window, sett_window):
-    options = {
-    "username": name_tx.get(),
-    "uuid": "59ac9ba1-2c3c-4c99-b7ba-7258525068b4",
-    "token": "token",
-    "jvmArguments": shared_data["jvmArguments"]
-}
-
-    if name_tx.get() == "":
-        messagebox.showwarning("Error", "Please enter your Minecraft name.")
-        name_tx.focus_force()
-    else:
-        save_config(config_file, name_tx, version_drop, shared_data)
-        minecraft_command = mc.command.get_minecraft_command(version_drop.get(), utils.get_dir(), options)
-        if "inst_window" in globals() and inst_window.winfo_exists():
-            inst_window.withdraw()
-        if "sett_window" in globals() and sett_window.winfo_exists():
-            sett_window.withdraw()
-        app.withdraw()
-        subprocess_run(minecraft_command)
-        if "inst_window" in globals() and inst_window.winfo_exists():
-            inst_window.deiconify()
-        if "sett_window" in globals() and sett_window.winfo_exists():
-            sett_window.deiconify()
-        app.deiconify()
 
 
 def apply_shared_data(key, value):
@@ -103,11 +57,28 @@ def installer_window():
 
     def install_version():
         def install_and_notify():
-            #if fabric_check.get() == 0 and forge_check.get() == 0:
-            mc.install.install_minecraft_version(installer_drop.get(), utils.get_dir())
-            #elif fabric_check.get == 1 and forge_check.get() == 0:
-            #mc.fabric.install_fabric(installer_drop.get(), utils.get_dir())
-            messagebox.showinfo("Installation Complete", f"Minecraft {installer_drop.get()} has been installed successfully!")
+            if fabric_check.get() == 0 and forge_check.get() == 0:
+                mc.install.install_minecraft_version(installer_drop.get(), utils.get_dir())
+                messagebox.showinfo("Installation Complete", f"Minecraft {installer_drop.get()}"
+                                                             f" has been installed successfully!")
+            elif fabric_check.get() == 1 and forge_check.get() == 1:
+               fabric_check.deselect()
+               forge_check.deselect()
+            elif fabric_check.get() == 1 and forge_check.get() == 0:
+                try:
+                    mc.fabric.install_fabric(installer_drop.get(), utils.get_dir())
+                    messagebox.showinfo("Installation Complete", f"Minecraft {installer_drop.get()}"
+                                                                 f" fabric has been installed successfully!")
+                except Exception as e:
+                    messagebox.showinfo("Error", f"Minecraft {installer_drop.get()}"
+                                                                 f" Fabric could not be installed: {e}")
+            elif fabric_check.get() == 0 and forge_check.get() == 1:
+                forge_ver = mc.forge.find_forge_version(installer_drop.get())
+                if not forge_ver:
+                    messagebox.showinfo("No forge version", f"Minecraft {installer_drop.get()}"
+                                                                 f" is not compatible with Forge")
+                else:
+                    mc.forge.install_forge_version(forge_ver, utils.get_dir())
 
         install_thread = threading.Thread(target=install_and_notify)
         install_thread.start()
@@ -115,19 +86,20 @@ def installer_window():
 
     inst_window = ctk.CTkToplevel()
     inst_window.title("Installation window")
-    inst_window.geometry("200x120")
+    inst_window.geometry("200x164")
     inst_window.lift()
     inst_window.attributes('-topmost', True)
     inst_window.after_idle(inst_window.attributes, '-topmost', False)
 
-    snap_check = ctk.CTkCheckBox(inst_window, text="Show Snapshots", command=update_versions)
-    snap_check.grid(row=1, column=0)
 
-    """fabric_check = ctk.CTkCheckBox(inst_window, text="Install Fabric")
-    fabric_check.grid(row=2, column=0)
+    snap_check = ctk.CTkCheckBox(inst_window, text="Show Snapshots", command=update_versions)
+    snap_check.grid(row=1, column=0, padx=(35, 0), sticky="w")
+
+    fabric_check = ctk.CTkCheckBox(inst_window, text="Install Fabric")
+    fabric_check.grid(row=2, column=0, pady=(4, 0), padx=(35, 0), sticky="w")
 
     forge_check = ctk.CTkCheckBox(inst_window, text="Install Forge")
-    forge_check.grid(row=3, column=0)"""
+    forge_check.grid(row=3, column=0, pady=(4, 0), padx=(35, 0), sticky="w")
 
     installer_drop = ctk.CTkComboBox(inst_window, values=utils.return_downloadable_versions(snap_check.get()))
     installer_drop.grid(row=0, column=0, padx=25, pady=8)
@@ -165,7 +137,7 @@ def append_news(news_frame, news_data):
 
 
 def main_window():
-    create_file_if_not_exists(config_file)
+    utils.create_file_if_not_exists(config_file)
     ctk.set_default_color_theme("green")
     ctk.set_appearance_mode("dark")
 
@@ -177,7 +149,7 @@ def main_window():
     app.grid_rowconfigure(0, weight=1)
 
 
-    launch_bt = ctk.CTkButton(app, text="Launch", command=lambda: execute_mc(app, name_tx, version_drop, installer_window, settings_window), width=200, height=60, font=(None, 20))
+    launch_bt = ctk.CTkButton(app, text="Launch", command=lambda: utils.execute_mc(app, name_tx, version_drop, installer_window, settings_window, shared_data, config_file), width=200, height=60, font=(None, 20))
     launch_bt.grid(row=0, column=0, pady=(10, 0), padx=(10, 0))
 
     version_drop = ctk.CTkComboBox(app, values=utils.return_installed_versions(), width=200)
