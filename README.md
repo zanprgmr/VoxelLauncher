@@ -12,7 +12,7 @@ VoxelLauncher is a **Minecraft launcher** built with pure Python, designed to si
 
 | Platform      | Supported Version(s)    | Notes                                  |
 |---------------|-------------------------|----------------------------------------|
-| Windows       | 10, 11                   | Fully supported                        |
+| Windows       | 7, 8, 10, 11                   | Fully supported                        |
 | macOS         | 10.15+                   | Testing ongoing - Supported             |
 | Linux         | Ubuntu 20.04+, Debian 10+| Fully supported             |
 | Python        | 3.6 - 3.11               | Required for running the launcher      |
