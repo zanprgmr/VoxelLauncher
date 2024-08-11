@@ -5,6 +5,7 @@ from pickle import dump
 from subprocess import run
 from tkinter import messagebox
 
+
 def get_dir(custom_dir=False):
     if custom_dir:
         dir = tkinter.filedialog.askdirectory()
@@ -27,8 +28,6 @@ def return_downloadable_versions(show_snapshots=False):
     return ver_list
 
 
-# TODO: implement the possibility to use a custom directory
-# Maybe use a constant
 def return_installed_versions():
     ver_list = []
     for ver in mc.utils.get_installed_versions(get_dir()):
@@ -53,11 +52,14 @@ def save_config(config_file, name, version, shared_data):
 
 
 def execute_mc(app, name_tx, version_drop, inst_window, sett_window, shared_data, config_file):
+
     options = {
     "username": name_tx.get(),
     "uuid": "59ac9ba1-2c3c-4c99-b7ba-7258525068b4",
     "token": "token",
-    "jvmArguments": shared_data["jvmArguments"]
+    "jvmArguments": shared_data["jvmArguments"],
+    "launcherName": "Voxel Launcher",
+    "launcherVersion": "1.2"
 }
 
     if name_tx.get() == "":
@@ -71,6 +73,8 @@ def execute_mc(app, name_tx, version_drop, inst_window, sett_window, shared_data
         if "sett_window" in globals() and sett_window.winfo_exists():
             sett_window.withdraw()
         app.withdraw()
+        extract_path = f"get_dir()/versions/{version_drop.get()}/natives"
+        mc.natives.extract_natives(version_drop.get(), get_dir(), extract_path)
         run(minecraft_command)
         if "inst_window" in globals() and inst_window.winfo_exists():
             inst_window.deiconify()
