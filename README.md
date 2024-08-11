@@ -35,6 +35,8 @@ VoxelLauncher is a **Minecraft launcher** built with pure Python, designed to si
     ```bash
     python main.py
     ```
+👉 **Check out the [Releases](https://github.com/zanprgmr/VoxelLauncher/releases)** for bundled releases (executables) that don't require manual installation steps.
+
 
 ## Screenshots 🖼️
 
