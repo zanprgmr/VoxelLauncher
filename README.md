@@ -6,16 +6,14 @@ VoxelLauncher is a **Minecraft launcher** built with pure Python, designed to si
 
 - **Simple Installation**: Easily install Minecraft and manage your versions.
 - **Real-Time News Feed**: Stay updated with the latest official Minecraft news directly from the launcher.
-- **Mod Support**: (Coming soon) Install and manage mods with ease.
-- **Account Login & Skin System**: (Coming soon) Log in with your account and manage your skins.
-- **World Backup**: (Coming soon) Easily back up your worlds to prevent data loss.
+- **Version support**: Supports non official minecraft versions such as custom clients and mod loaders.
 
 ## Compatibility 🖥️
 
 | Platform      | Supported Version(s)    | Notes                                  |
 |---------------|-------------------------|----------------------------------------|
 | Windows       | 10, 11                   | Fully supported                        |
-| macOS         | 10.15+                   | Testing ongoing - Supported                        |
+| macOS         | 10.15+                   | Testing ongoing - Supported             |
 | Linux         | Ubuntu 20.04+, Debian 10+| Fully supported             |
 | Python        | 3.6 - 3.11               | Required for running the launcher      |
 
