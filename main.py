@@ -172,13 +172,13 @@ def main_window():
     name_tx.grid(row=2, column=0, sticky="w", padx=(10, 0), pady=(120, 0))
 
     try:
-        folder_img = Image.open("./images/folder.png")
+        folder_img = Image.open("assets/folder.png")
     # Added for compatibility with PyInstaller
     except FileNotFoundError:
         folder_img = Image.open("folder.png")
 
     try:
-        gear_img = Image.open("./images/gear.png")
+        gear_img = Image.open("assets/gear.png")
     # Added for compatibility with PyInstaller
     except FileNotFoundError:
         gear_img = Image.open("gear.png")
