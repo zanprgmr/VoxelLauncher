@@ -197,8 +197,17 @@ def main_window():
     scrollable_frame = ctk.CTkScrollableFrame(app, width=360)
     scrollable_frame.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=(10, 10), pady=(10, 10))
 
-    news_data = mc.utils.get_minecraft_news()["article_grid"]
-    append_news(scrollable_frame, news_data)
+
+
+    try:
+        news_data = mc.utils.get_minecraft_news()["article_grid"]
+        append_news(scrollable_frame, news_data)
+    except Exception:
+        def offline_msg():
+            messagebox.showwarning("No internet", "Could not connect to internet, some functions like installing or "
+                                                  "repairing a version are not available."
+                                                  "\nCustom versions could not be available neither.")
+        threading.Thread(target=offline_msg).start()
 
     try:
         with open(config_file, "rb") as config_read:
