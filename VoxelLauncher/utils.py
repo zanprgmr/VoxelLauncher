@@ -1,3 +1,5 @@
+import os
+import sys
 import tkinter.filedialog
 import minecraft_launcher_lib as mc
 from os.path import exists
@@ -81,3 +83,12 @@ def execute_mc(app, name_tx, version_drop, inst_window, sett_window, shared_data
         if "sett_window" in globals() and sett_window.winfo_exists():
             sett_window.deiconify()
         app.deiconify()
+
+
+# Compatibility with pyinstaller
+def pyinstaller_find(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)

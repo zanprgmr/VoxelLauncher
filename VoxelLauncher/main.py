@@ -171,17 +171,16 @@ def main_window():
     name_tx = ctk.CTkEntry(app, placeholder_text="Username", width=120)
     name_tx.grid(row=2, column=0, sticky="w", padx=(10, 0), pady=(120, 0))
 
+
     try:
         folder_img = Image.open("assets/folder.png")
-    # Added for compatibility with PyInstaller
     except FileNotFoundError:
-        folder_img = Image.open("folder.png")
+        folder_img = Image.open(utils.pyinstaller_find("folder.png"))
 
     try:
         gear_img = Image.open("assets/gear.png")
-    # Added for compatibility with PyInstaller
     except FileNotFoundError:
-        gear_img = Image.open("gear.png")
+        gear_img = Image.open(utils.pyinstaller_find("gear.png"))
 
     sett_window_button = ctk.CTkButton(app, text="", image=ctk.CTkImage(gear_img),
                                        command=lambda: settings_window(version_drop), width=35)
