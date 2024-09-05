@@ -1,17 +1,22 @@
+
 import pickle
 import shlex
 import threading
 import tkinter.messagebox as messagebox
-from os import startfile
+import os
 from webbrowser import open as webopen
 
 import customtkinter as ctk
 import minecraft_launcher_lib as mc
+import requests
 from PIL import Image
 
 import utils
 
-config_file = "config.pickle"
+appdata_path = os.path.join(os.getenv('APPDATA'), 'VoxelLauncher')
+os.makedirs(appdata_path, exist_ok=True)
+config_file = os.path.join(appdata_path, "config.pickle")
+
 shared_data = {"jvmArguments": None}
 
 
@@ -120,31 +125,49 @@ def installer_window():
     return inst_window
 
 
-def append_news(news_frame, news_data):
+def append_news(news_frame, news_data, rss):
     def open_article(url):
         webopen(url)
 
-    i = 0
-    for news in news_data:
-        i += 1
-        title = news["default_tile"]["title"]
-        subtitle = news["default_tile"]["sub_header"]
-        image_url = "https://minecraft.net" + news["default_tile"]["image"]["imageURL"]
-        # image_url = "https://www.python.org/static/community_logos/python-logo.png"
-        article_url = "https://minecraft.net" + news["article_url"]
+    if not rss:
+        for news in news_data:
+            title = news["default_tile"]["title"]
+            subtitle = news["default_tile"]["sub_header"]
+            article_url = "https://minecraft.net" + news["article_url"]
 
-        title_label = ctk.CTkLabel(news_frame, text=title, font=("Arial", 16, "bold"))
-        title_label.pack()
 
-        subtitle_label = ctk.CTkLabel(news_frame, text=subtitle, font=("Arial", 12))
-        subtitle_label.pack()
+            title_label = ctk.CTkLabel(news_frame, text=title, font=("Arial", 16, "bold"))
+            title_label.pack()
 
-        read_more_button = ctk.CTkButton(news_frame, text="Read More",
-                                         command=lambda url=article_url: open_article(url))
-        read_more_button.pack()
+            subtitle_label = ctk.CTkLabel(news_frame, text=subtitle, font=("Arial", 12))
+            subtitle_label.pack()
 
-        spacer = ctk.CTkLabel(news_frame, text="", height=20)
-        spacer.pack()
+            read_more_button = ctk.CTkButton(news_frame, text="Read More",
+                                             command=lambda url=article_url: open_article(url))
+            read_more_button.pack()
+
+            spacer = ctk.CTkLabel(news_frame, text="", height=20)
+            spacer.pack()
+    else:
+        for news in news_data.entries:
+            title = news.title
+            subtitle = news.description
+            article_url = news.link
+
+            title_label = ctk.CTkLabel(news_frame, text=title, font=("Arial", 16, "bold"))
+            title_label.pack()
+
+            subtitle_label = ctk.CTkLabel(news_frame, text=subtitle, font=("Arial", 12))
+            subtitle_label.pack()
+
+            read_more_button = ctk.CTkButton(news_frame, text="Read More",
+                                             command=lambda url=article_url: open_article(url))
+            read_more_button.pack()
+
+            spacer = ctk.CTkLabel(news_frame, text="", height=20)
+            spacer.pack()
+
+
 
 
 def main_window():
@@ -159,6 +182,17 @@ def main_window():
     app.resizable(False, False)
     app.grid_rowconfigure(0, weight=1)
 
+    try:
+        folder_img = Image.open("assets/folder.png")
+    except FileNotFoundError:
+        folder_img = Image.open(utils.pyinstaller_find("folder.png"))
+
+    try:
+        gear_img = Image.open("assets/gear.png")
+    except FileNotFoundError:
+        gear_img = Image.open(utils.pyinstaller_find("gear.png"))
+
+
     launch_bt = ctk.CTkButton(app, text="Launch", command=lambda: utils.execute_mc(app, name_tx, version_drop,
                                                                                    installer_window, settings_window,
                                                                                    shared_data, config_file), width=200,
@@ -171,23 +205,12 @@ def main_window():
     name_tx = ctk.CTkEntry(app, placeholder_text="Username", width=120)
     name_tx.grid(row=2, column=0, sticky="w", padx=(10, 0), pady=(120, 0))
 
-
-    try:
-        folder_img = Image.open("assets/folder.png")
-    except FileNotFoundError:
-        folder_img = Image.open(utils.pyinstaller_find("folder.png"))
-
-    try:
-        gear_img = Image.open("assets/gear.png")
-    except FileNotFoundError:
-        gear_img = Image.open(utils.pyinstaller_find("gear.png"))
-
     sett_window_button = ctk.CTkButton(app, text="", image=ctk.CTkImage(gear_img),
                                        command=lambda: settings_window(version_drop), width=35)
     sett_window_button.grid(row=2, column=0, pady=(120, 0), padx=(95, 0))
 
     open_dir_bt = ctk.CTkButton(app, text="", image=ctk.CTkImage(folder_img), width=35,
-                                command=lambda: startfile(utils.get_dir()))
+                                command=lambda: os.startfile(utils.get_dir()))
     open_dir_bt.grid(row=2, column=0, sticky="e", pady=(120, 0))
 
     install_win_bt = ctk.CTkButton(app, text="Installations window", command=installer_window, width=200)
@@ -196,17 +219,26 @@ def main_window():
     scrollable_frame = ctk.CTkScrollableFrame(app, width=360)
     scrollable_frame.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=(10, 10), pady=(10, 10))
 
-
-
+    # Fix when news api is back
     try:
+        title_label = ctk.CTkLabel(scrollable_frame, text="News feed is unavailable\n due to minecraft api changes,\n "
+                                                          "sorry,"
+                                                    " ill have it fixed asap", font=("Arial", 16, "bold"))
+        title_label.pack()
         news_data = mc.utils.get_minecraft_news()["article_grid"]
-        append_news(scrollable_frame, news_data)
-    except Exception:
-        def offline_msg():
-            messagebox.showwarning("No internet", "Could not connect to internet, some functions like installing or "
+        append_news(scrollable_frame, news_data, False)
+    except requests.RequestException:
+        """try:
+
+            news_data = feedparser.parse("https://www.minecraft.net/en-us/feeds/community-content/rss")
+            append_news(scrollable_frame, news_data, True)
+        except requests.RequestException:
+            def offline_msg():
+                messagebox.showwarning("No internet", "Could not connect to internet, some functions like installing or "
                                                   "repairing a version are not available."
                                                   "\nCustom versions could not be available neither.")
-        threading.Thread(target=offline_msg).start()
+            threading.Thread(target=offline_msg).start()"""
+        pass
 
     try:
         with open(config_file, "rb") as config_read:
@@ -218,8 +250,6 @@ def main_window():
     except (TypeError, EOFError, FileNotFoundError):
         pass
 
-    except (TypeError, EOFError):
-        pass
 
     return app
 
@@ -230,3 +260,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
