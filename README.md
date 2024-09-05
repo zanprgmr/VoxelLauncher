@@ -1,5 +1,5 @@
 # ⚠️NOTE⚠️
-I am aware of the error raised on launch that says that there is no internet, this is due to recent changes on minecraft news api, right now i am trying to fix it asap. ALl features except the news feed are working as usual.
+I am aware of the error raised on launch that says that there is no internet, this is due to recent changes on minecraft news api, right now i am trying to fix it asap. All features except the news feed are working as usual.
 
 # VoxelLauncher 🎮🚀
 
