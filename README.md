@@ -1,3 +1,6 @@
+# ⚠️NOTE⚠️
+I am aware of the error raised on launch that says that there is no internet, this is due to recent changes on minecraft news api, right now i am trying to fix it asap. ALl features except the news feed are working as usual.
+
 # VoxelLauncher 🎮🚀
 
 VoxelLauncher is a **Minecraft launcher** built with pure Python, designed to simplify Minecraft installation, offer real-time official news updates, and provide a range of customization options. This project is currently a work in progress.
