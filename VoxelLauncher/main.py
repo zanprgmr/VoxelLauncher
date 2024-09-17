@@ -124,47 +124,29 @@ def installer_window():
     return inst_window
 
 
-def append_news(news_frame, news_data, rss):
+def append_news(news_frame, news_data):
     def open_article(url):
         webopen(url)
 
-    if not rss:
-        for news in news_data:
-            title = news["default_tile"]["title"]
-            subtitle = news["default_tile"]["sub_header"]
-            article_url = "https://minecraft.net" + news["article_url"]
+    for news in news_data["entries"]:
+        title = news["title"]
+        subtitle = news["text"]
+        article_url = news["readMoreLink"]
 
 
-            title_label = ctk.CTkLabel(news_frame, text=title, font=("Arial", 16, "bold"))
-            title_label.pack()
+        title_label = ctk.CTkLabel(news_frame, text=title, font=("Arial", 16, "bold"), wraplength=320)
+        title_label.pack()
 
-            subtitle_label = ctk.CTkLabel(news_frame, text=subtitle, font=("Arial", 12))
-            subtitle_label.pack()
+        subtitle_label = ctk.CTkLabel(news_frame, text=subtitle, font=("Arial", 12), wraplength=380)
+        subtitle_label.pack()
 
-            read_more_button = ctk.CTkButton(news_frame, text="Read More",
-                                             command=lambda url=article_url: open_article(url))
-            read_more_button.pack()
+        read_more_button = ctk.CTkButton(news_frame, text="Read More",
+                                         command=lambda url=article_url: open_article(url))
+        read_more_button.pack()
 
-            spacer = ctk.CTkLabel(news_frame, text="", height=20)
-            spacer.pack()
-    else:
-        for news in news_data.entries:
-            title = news.title
-            subtitle = news.description
-            article_url = news.link
+        spacer = ctk.CTkLabel(news_frame, text="", height=20)
+        spacer.pack()
 
-            title_label = ctk.CTkLabel(news_frame, text=title, font=("Arial", 16, "bold"))
-            title_label.pack()
-
-            subtitle_label = ctk.CTkLabel(news_frame, text=subtitle, font=("Arial", 12))
-            subtitle_label.pack()
-
-            read_more_button = ctk.CTkButton(news_frame, text="Read More",
-                                             command=lambda url=article_url: open_article(url))
-            read_more_button.pack()
-
-            spacer = ctk.CTkLabel(news_frame, text="", height=20)
-            spacer.pack()
 
 
 
@@ -218,26 +200,16 @@ def main_window():
     scrollable_frame = ctk.CTkScrollableFrame(app, width=360)
     scrollable_frame.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=(10, 10), pady=(10, 10))
 
-    # Fix when news api is back
     try:
-        title_label = ctk.CTkLabel(scrollable_frame, text="News feed is unavailable\n due to minecraft api changes,\n "
-                                                          "sorry,"
-                                                    " ill have it fixed asap", font=("Arial", 16, "bold"))
-        title_label.pack()
-        news_data = mc.utils.get_minecraft_news()["article_grid"]
-        append_news(scrollable_frame, news_data, False)
-    except requests.RequestException:
-        """try:
 
-            news_data = feedparser.parse("https://www.minecraft.net/en-us/feeds/community-content/rss")
-            append_news(scrollable_frame, news_data, True)
-        except requests.RequestException:
-            def offline_msg():
-                messagebox.showwarning("No internet", "Could not connect to internet, some functions like installing or "
+        news_data = requests.get("https://launchercontent.mojang.com/news.json").json()
+        append_news(scrollable_frame, news_data)
+    except requests.RequestException:
+        def offline_msg():
+            messagebox.showwarning("No internet", "Could not connect to internet, some functions like installing or "
                                                   "repairing a version are not available."
                                                   "\nCustom versions could not be available neither.")
-            threading.Thread(target=offline_msg).start()"""
-        pass
+            threading.Thread(target=offline_msg).start()
 
     try:
         with open(config_file, "rb") as config_read:
@@ -259,4 +231,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
