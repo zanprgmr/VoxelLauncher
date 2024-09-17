@@ -1,7 +1,3 @@
-# ⚠️NOTE⚠️
-Sorry for the news feed error, minecraft news api is down and i do not have any information when or even if its coming back, ill try alternatives. Im so sorry :( 
-# VoxelLauncher 🎮🚀
-
 VoxelLauncher is a **Minecraft launcher** built with pure Python, designed to simplify Minecraft installation, offer real-time official news updates, and provide a range of customization options. This project is currently a work in progress.
 
 ## Features ✨
